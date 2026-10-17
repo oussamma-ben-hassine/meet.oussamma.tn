@@ -16,7 +16,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - internal_net
+      - meetspot-net
 
   redis:
     image: redis:7-alpine
@@ -30,7 +30,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - internal_net
+      - meetspot-net
 
   backend:
     build:
@@ -63,7 +63,7 @@ services:
       timeout: 5s
       retries: 3
     networks:
-      - internal_net
+      - meetspot-net
     expose:
       - "8000"
 
@@ -86,22 +86,20 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
-    ports:
-      - "3000"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=coolify"
-      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
     networks:
-      coolify:
-        aliases:
-          - frontend
-      internal_net:
-        aliases:
-          - frontend
+      - meetspot-net
+      - coolify
+    labels:
+      - "coolify.managed=true"
+      - "traefik.enable=true"
+      - "traefik.http.routers.meetspot.rule=Host(`meet.oussamma.tn`)"
+      - "traefik.http.routers.meetspot.entrypoints=http,https"
+      - "traefik.http.routers.meetspot.tls=true"
+      - "traefik.http.routers.meetspot.tls.certresolver=letsencrypt"
+      - "traefik.http.services.meetspot.loadbalancer.server.port=3000"
 
 networks:
-  internal_net:
+  meetspot-net:
     driver: bridge
   coolify:
     external: true
