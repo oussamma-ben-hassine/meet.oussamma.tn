@@ -82,24 +82,20 @@ services:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: "0.0.0.0"
+    ports:
+      - "3000"
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 15s
       timeout: 5s
       retries: 3
     networks:
-      - meetspot-net
-      - coolify
-    labels:
-      - "coolify.managed=true"
-      - "traefik.enable=true"
-      - "traefik.docker.network=coolify"
-      - "traefik.http.routers.meetspot.rule=Host(`meet.oussamma.tn`)"
-      - "traefik.http.routers.meetspot.entrypoints=http,https"
-      - "traefik.http.routers.meetspot.tls=true"
-      - "traefik.http.routers.meetspot.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.meetspot.service=meetspot"
-      - "traefik.http.services.meetspot.loadbalancer.server.port=3000"
+      coolify:
+        aliases:
+          - frontend
+      meetspot-net:
+        aliases:
+          - frontend
 
 networks:
   meetspot-net:
