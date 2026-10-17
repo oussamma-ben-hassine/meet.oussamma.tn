@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: meetspot_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-meetspot_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meetspot_secure_password_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-meetspot_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meetspot_user} -d ${POSTGRES_DB:-meetspot_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - meetspot_internal
+
+  redis:
+    image: redis:7-alpine
+    container_name: meetspot_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - meetspot_internal
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: meetspot_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      DEBUG: ${DEBUG:-false}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://meetspot_user:meetspot_secure_password_2026@postgres:5432/meetspot_db}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      SECRET_KEY: ${SECRET_KEY:-meetspot_super_secret_jwt_key_2026}
+      SSO_BASE_URL: ${SSO_BASE_URL:-https://sso-a.oussamma.tn}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:-client_424090bad2dcadc34cdda40f}
+      SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-sec_RGhuA2Qsxu5YDZ_7NT4j8wNeWnGrd3l8E9dbeko0QcM}
+      SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-https://meet.oussamma.tn/auth/callback}
+      SUPER_ADMIN_EMAILS: ${SUPER_ADMIN_EMAILS:-contact@oussamma.tn}
+      LITELLM_BASE_URL: ${LITELLM_BASE_URL:-https://ai.oussamma.tn/v1}
+      LITELLM_API_KEY: ${LITELLM_API_KEY:-sk-oussamma-master-gateway-2026}
+      LITELLM_DEFAULT_MODEL: ${LITELLM_DEFAULT_MODEL:-chatgpt/gpt-5.4}
+      ROUTING_PROVIDER: ${ROUTING_PROVIDER:-mock}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - meetspot_internal
+    expose:
+      - "8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${APP_URL:-https://meet.oussamma.tn}
+        NEXT_PUBLIC_BACKEND_URL: ${BACKEND_URL:-https://meet.oussamma.tn}
+        NEXT_PUBLIC_MAP_STYLE: ${MAP_STYLE_URL:-https://tiles.openfreemap.org/styles/liberty}
+    container_name: meetspot_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - meetspot_internal
+    ports:
+      - "3000:3000"
+
+networks:
+  meetspot_internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

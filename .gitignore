@@ -1,0 +1,12 @@
+node_modules/
+.next/
+dist/
+build/
+*.pyc
+__pycache__/
+.env
+.venv
+*.sqlite
+*.sqlite3
+postgres_data/
+redis_data/
