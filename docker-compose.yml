@@ -3,7 +3,6 @@ version: '3.8'
 services:
   postgres:
     image: postgis/postgis:16-3.4-alpine
-    container_name: meetspot_postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-meetspot_user}
@@ -21,7 +20,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: meetspot_redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     volumes:
@@ -38,7 +36,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: meetspot_backend
     restart: unless-stopped
     depends_on:
       postgres:
@@ -78,7 +75,6 @@ services:
         NEXT_PUBLIC_APP_URL: ${APP_URL:-https://meet.oussamma.tn}
         NEXT_PUBLIC_BACKEND_URL: ${BACKEND_URL:-https://meet.oussamma.tn}
         NEXT_PUBLIC_MAP_STYLE: ${MAP_STYLE_URL:-https://tiles.openfreemap.org/styles/liberty}
-    container_name: meetspot_frontend
     restart: unless-stopped
     depends_on:
       - backend
@@ -90,14 +86,17 @@ services:
       interval: 15s
       timeout: 5s
       retries: 3
+    ports:
+      - "3000"
     networks:
       - meetspot_internal
-    ports:
-      - "3000:3000"
+      - coolify
 
 networks:
   meetspot_internal:
     driver: bridge
+  coolify:
+    external: true
 
 volumes:
   postgres_data:
