@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
+import { Navbar } from '@/components/Navbar';
+
 export const metadata: Metadata = {
   title: 'MeetSpot — Le Meilleur Compromis de Rencontre',
   description: 'Trouvez le meilleur café, restaurant, parc ou activité pour une rencontre équitable entre amis.',
@@ -23,36 +25,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#080808] text-white flex flex-col min-h-screen antialiased selection:bg-[#ea580c] selection:text-white">
-        <header className="sticky top-0 z-50 backdrop-blur-md bg-[#080808]/80 border-b border-white/10 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <a href="/" className="flex items-center gap-2 group">
-              <span className="w-8 h-8 rounded-lg bg-[#ea580c] flex items-center justify-center font-black text-white shadow-md shadow-[#ea580c]/30 group-hover:scale-105 transition-transform">
-                M
-              </span>
-              <span className="font-bold text-lg tracking-tight text-white">
-                Meet<span className="text-[#ea580c]">Spot</span>
-              </span>
-            </a>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-neutral-400 font-mono hidden sm:inline-block">
-              oussamma.tn
-            </span>
-          </div>
-          
-          <nav className="flex items-center gap-4 text-sm font-medium">
-            <a href="/search" className="text-neutral-300 hover:text-white transition-colors">
-              Recherche
-            </a>
-            <a href="/meetings" className="text-neutral-300 hover:text-white transition-colors">
-              Mes Rencontres
-            </a>
-            <a
-              href="https://sso-a.oussamma.tn/oauth/authorize?client_id=client_424090bad2dcadc34cdda40f&redirect_uri=https://meet.oussamma.tn/auth/callback&response_type=code&scope=openid%20profile%20email"
-              className="px-4 py-1.5 rounded-full bg-white text-black font-semibold hover:bg-neutral-200 transition-colors shadow-sm text-xs"
-            >
-              Connexion SSO
-            </a>
-          </nav>
-        </header>
+        <Navbar />
 
         <main className="flex-1">{children}</main>
 

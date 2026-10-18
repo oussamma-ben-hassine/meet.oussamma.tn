@@ -20,6 +20,7 @@ from app.schemas.schemas import (
     CandidateOut, VoteCreate, InvitationAccept, PlaceOut, PlaceBase,
     AIChatRequest, AIChatResponse, AIParsedConstraints
 )
+import httpx
 from app.services.scoring import evaluate_candidate
 from app.services.ai import AIService
 
@@ -28,6 +29,42 @@ router = APIRouter()
 # =============================================================================
 # AUTH & ME
 # =============================================================================
+@router.post("/auth/callback")
+async def sso_callback(payload: dict, db: AsyncSession = Depends(get_db)):
+    code = payload.get("code")
+    redirect_uri = payload.get("redirect_uri") or settings.SSO_REDIRECT_URI
+    if not code:
+        raise HTTPException(status_code=400, detail="Code d'autorisation manquant")
+        
+    token_url = f"{settings.SSO_BASE_URL.rstrip('/')}/oauth/token"
+    token_payload = {
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": redirect_uri,
+        "client_id": settings.SSO_CLIENT_ID,
+        "client_secret": settings.SSO_CLIENT_SECRET,
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            res = await client.post(token_url, data=token_payload)
+            if res.status_code != 200:
+                res = await client.post(token_url, json=token_payload)
+            if res.status_code != 200:
+                raise HTTPException(status_code=400, detail=f"Échec échange jeton SSO: {res.text}")
+            token_data = res.json()
+            access_token = token_data.get("access_token")
+            if not access_token:
+                raise HTTPException(status_code=400, detail="Jeton d'accès manquant dans la réponse SSO")
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erreur communication SSO: {str(e)}")
+        
+    user = await verify_sso_token_and_get_user(access_token, db)
+    token = create_access_token({"sub": user.id, "role": user.role, "email": user.email})
+    return {"token": token, "user": UserOut.model_validate(user)}
+
 @router.post("/auth/sso-login")
 async def sso_login(payload: dict, db: AsyncSession = Depends(get_db)):
     access_token = payload.get("access_token")

@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     
     # SSO Ecosystem
     SSO_BASE_URL: str = "https://sso-a.oussamma.tn"
-    SSO_CLIENT_ID: str = "client_424090bad2dcadc34cdda40f"
-    SSO_CLIENT_SECRET: str = "sec_RGhuA2Qsxu5YDZ_7NT4j8wNeWnGrd3l8E9dbeko0QcM"
+    SSO_CLIENT_ID: str = "client_meetspot_app"
+    SSO_CLIENT_SECRET: str = "sec_meetspot_platform_secret_2026"
     SSO_REDIRECT_URI: str = "https://meet.oussamma.tn/auth/callback"
     SSO_SCOPES: str = "openid profile email"
     SUPER_ADMIN_EMAILS: str = "contact@oussamma.tn"

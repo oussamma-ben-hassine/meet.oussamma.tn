@@ -49,8 +49,8 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       SECRET_KEY: ${SECRET_KEY:-meetspot_super_secret_jwt_key_2026}
       SSO_BASE_URL: ${SSO_BASE_URL:-https://sso-a.oussamma.tn}
-      SSO_CLIENT_ID: ${SSO_CLIENT_ID:-client_424090bad2dcadc34cdda40f}
-      SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-sec_RGhuA2Qsxu5YDZ_7NT4j8wNeWnGrd3l8E9dbeko0QcM}
+      SSO_CLIENT_ID: ${SSO_CLIENT_ID:-client_meetspot_app}
+      SSO_CLIENT_SECRET: ${SSO_CLIENT_SECRET:-sec_meetspot_platform_secret_2026}
       SSO_REDIRECT_URI: ${SSO_REDIRECT_URI:-https://meet.oussamma.tn/auth/callback}
       SUPER_ADMIN_EMAILS: ${SUPER_ADMIN_EMAILS:-contact@oussamma.tn}
       LITELLM_BASE_URL: ${LITELLM_BASE_URL:-https://ai.oussamma.tn/v1}
